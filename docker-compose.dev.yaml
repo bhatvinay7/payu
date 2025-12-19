@@ -28,9 +28,10 @@ services:
     networks:
       - payit
     depends_on:
-      - kurrent1
-      # - kurrent2
-      # - kurrent3    
+      - kafka1
+      - kafka2  
+      - kafka3
+      - postgres
     deploy:
       resources:
         limits:
@@ -65,9 +66,10 @@ services:
     networks:
       - payit
     depends_on:
-      - kurrent1
-      # - kurrent2
-      # - kurrent3  
+      - kafka1
+      - kafka2  
+      - kafka3
+      - postgres
     deploy:
       resources:
         limits:
@@ -101,106 +103,170 @@ services:
     networks:
       - payit
     depends_on:
-      - kurrent1
-      # - kurrent2
-      # - kurrent3    
+      - kafka1
+      - kafka2  
+      - kafka3
+      - postgres
     deploy:
       resources:
         limits:
           cpus: '0.25'
           memory: 1G                                   
-  rabbitmq:
-    container_name: rabbitmq
-    image: "rabbitmq:3-management"
-    environment:
-      RABBITMQ_DEFAULT_USER: inbox_user
-      RABBITMQ_DEFAULT_PASS: inbox_password
-    volumes:
-      - rabbitmq-data:/var/lib/rabbitmq
+  # rabbitmq:
+    # container_name: rabbitmq
+    # image: "rabbitmq:3-management"
+    # environment:
+      # RABBITMQ_DEFAULT_USER: inbox_user
+      # RABBITMQ_DEFAULT_PASS: inbox_password
+    # volumes:
+      # - rabbitmq-data:/var/lib/rabbitmq
+    # ports:
+      # - "5672:5672"
+      # - "15672:15672"
+    # networks:
+      # - payit
+    # deploy:
+      # resources:
+        # limits:
+          # cpus: '1'
+          # memory: 2G
+  postgres:
+    image: postgres:16
+    container_name: postgres_db
+    restart: unless-stopped
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: "ledger_db"
+    networks:
+       - payit  
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    deploy:
+      resources:        
+        limits:
+          cpus: '1'
+          memory: 2G  
+  kafka1:
+    image: bitnami/kafka:4.1.0
+    container_name: kafka1
+    ports:
+      - "9092:9092"   # EXTERNAL for client
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_NODE_ID=1
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093,2@kafka2:9093,3@kafka3:9093
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9091,EXTERNAL://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka1:9091,EXTERNAL://localhost:9092
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT,CONTROLLER:SASL_PLAINTEXT
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_SASL_ENABLED_MECHANISMS=PLAIN
+      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
+      - KAFKA_CFG_SECURITY_INTER_BROKER_PROTOCOL=SASL_PLAINTEXT
+      - KAFKA_CLIENT_USERS=admin
+      - KAFKA_CLIENT_PASSWORDS=admin-secret
+      - KAFKA_INTER_BROKER_USER=broker
+      - KAFKA_INTER_BROKER_PASSWORD=broker-secret
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_ENABLE_AUTO_COMMIT=false
+      - KAFKA_CFG_LOG_RETENTION_MS=120000
+      - KAFKA_LOGS_MAX_FILESIZE=10485760
+      - KAFKA_LOGS_MAX_BACKUPS=2
+    volumes:
+      - kafka1_data:/bitnami/kafka
     networks:
       - payit
     deploy:
       resources:
         limits:
           cpus: '1'
-          memory: 2G
-  kurrent1:
-    image: kurrentplatform/kurrentdb:latest
-    container_name: kurrent1
-    privileged: true
-    environment:
-      - KURRENTDB_CLUSTER_SIZE=1
-      - KURRENTDB_DISCOVER_VIA_DNS=false
-      - KURRENTDB_INSECURE=true
-      # - KURRENTDB_GOSSIP_SEED=kurrent2:2113,kurrent3:2113
-      - KURRENTDB_ADVERTISE_HOST_TO_CLIENT_AS=kurrent1
-      - KURRENTDB_ADVERTISE_NODE_PORT_TO_CLIENT_AS=2113
-      # - KURRENTDB_GOSSIP_ALLOWED_DIFFERENCE_MS=120000
+          memory: 2G  
+    
+  kafka2:
+    image: bitnami/kafka:4.1.0
+    container_name: kafka2
     ports:
-      - "2113:2113"
-      - "1111:1113"
+      - "9093:9092"
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_NODE_ID=2
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093,2@kafka2:9093,3@kafka3:9093
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9091,EXTERNAL://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka2:9091,EXTERNAL://localhost:9093
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT,CONTROLLER:SASL_PLAINTEXT
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_SASL_ENABLED_MECHANISMS=PLAIN
+      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
+      - KAFKA_CFG_SECURITY_INTER_BROKER_PROTOCOL=SASL_PLAINTEXT
+      - KAFKA_CLIENT_USERS=admin
+      - KAFKA_CLIENT_PASSWORDS=admin-secret
+      - KAFKA_INTER_BROKER_USER=broker
+      - KAFKA_INTER_BROKER_PASSWORD=broker-secret
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_ENABLE_AUTO_COMMIT=false
+      - KAFKA_CFG_LOG_RETENTION_MS=120000
+      - KAFKA_LOGS_MAX_FILESIZE=10485760
+      - KAFKA_LOGS_MAX_BACKUPS=2
     volumes:
-      - kurrent1-data:/var/lib/kurrentdb
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-      
+      - kafka2_data:/bitnami/kafka
     networks:
       - payit
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G    
 
-  # kurrent2:
-    # image: kurrentplatform/kurrentdb:latest
-    # container_name: kurrent2
-    # privileged: true
-    # environment:
-      # - KURRENTDB_CLUSTER_SIZE=3
-      # - KURRENTDB_DISCOVER_VIA_DNS=false
-      # - KURRENTDB_INSECURE=true
-      # - KURRENTDB_GOSSIP_SEED=kurrent1:2113,kurrent3:2113
-      # - KURRENTDB_ADVERTISE_HOST_TO_CLIENT_AS=kurrent2
-      # - KURRENTDB_ADVERTISE_NODE_PORT_TO_CLIENT_AS=2113
-      # - KURRENTDB_GOSSIP_ALLOWED_DIFFERENCE_MS=120000
-      # 
-    # ports:
-      # - "2115:2113"
-      # - "1112:1113"
-    # volumes:
-      # - kurrent2-data:/var/lib/kurrentdb
-      # - /etc/localtime:/etc/localtime:ro
-      # - /etc/timezone:/etc/timezone:ro
-    # networks:
-      # - payit
-# 
-  # kurrent3:
-    # image: kurrentplatform/kurrentdb:latest
-    # container_name: kurrent3
-    # privileged: true
-    # environment:
-      # - KURRENTDB_CLUSTER_SIZE=3
-      # - KURRENTDB_DISCOVER_VIA_DNS=false
-      # - KURRENTDB_INSECURE=true
-      # - KURRENTDB_GOSSIP_SEED=kurrent1:2113,kurrent2:2113
-      # - KURRENTDB_ADVERTISE_HOST_TO_CLIENT_AS=kurrent3
-      # - KURRENTDB_ADVERTISE_NODE_PORT_TO_CLIENT_AS=2113
-      # - KURRENTDB_GOSSIP_ALLOWED_DIFFERENCE_MS=120000
-    # ports:
-      # - "2117:2113"
-      # - "1113:1113"
-    # volumes:
-      # - kurrent3-data:/var/lib/kurrentdb
-      # - /etc/localtime:/etc/localtime:ro
-      # - /etc/timezone:/etc/timezone:ro
-    # networks:
-      # - payit 
-
+  kafka3:
+    image: bitnami/kafka:4.1.0
+    container_name: kafka3
+    ports:
+      - "9094:9092"   # EXTERNAL for client
+    environment:
+      - KAFKA_ENABLE_KRAFT=yes
+      - KAFKA_CFG_NODE_ID=3
+      - KAFKA_CFG_PROCESS_ROLES=broker,controller
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=1@kafka1:9093,2@kafka2:9093,3@kafka3:9093
+      - KAFKA_CFG_LISTENERS=INTERNAL://:9091,EXTERNAL://:9092,CONTROLLER://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=INTERNAL://kafka3:9091,EXTERNAL://localhost:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:SASL_PLAINTEXT,EXTERNAL:SASL_PLAINTEXT,CONTROLLER:SASL_PLAINTEXT
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=INTERNAL
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CFG_SASL_ENABLED_MECHANISMS=PLAIN
+      - KAFKA_CFG_SASL_MECHANISM_INTER_BROKER_PROTOCOL=PLAIN
+      - KAFKA_CFG_SECURITY_INTER_BROKER_PROTOCOL=SASL_PLAINTEXT
+      - KAFKA_CLIENT_USERS=admin
+      - KAFKA_CLIENT_PASSWORDS=admin-secret
+      - KAFKA_INTER_BROKER_USER=broker
+      - KAFKA_INTER_BROKER_PASSWORD=broker-secret
+      - KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_CFG_ENABLE_AUTO_COMMIT=false
+      - KAFKA_CFG_LOG_RETENTION_MS=120000
+      - KAFKA_LOGS_MAX_FILESIZE=10485760
+      - KAFKA_LOGS_MAX_BACKUPS=2
+    volumes:
+      - kafka3_data:/bitnami/kafka  
+    networks:
+      - payit
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2G          
 networks:
   payit:
     name: payit
     driver: bridge      
 volumes:
   rabbitmq-data:
-  kurrent1-data:
-  # kurrent2-data:
-  # kurrent3-data:
+  volumes:
+  postgres_data:
+  kafka1_data:
+  kafka2_data:  
+  kafka3_data:

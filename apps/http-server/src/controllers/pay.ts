@@ -4,7 +4,6 @@ import { v4 as uuid } from "uuid";
 import getRedisClient from "redisclient";
 import {client}  from "ledger";
 import {AuthRequest,TransactionEvent} from 'types'
-import { jsonEvent,NO_STREAM ,ANY } from '@eventstore/db-client';
 import  Decimal from "decimal.js"
 export const payAmount = async (req:AuthRequest, res: Response) => {
   try {

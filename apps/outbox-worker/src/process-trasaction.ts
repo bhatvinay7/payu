@@ -39,51 +39,6 @@ export async function startOutboxWorker() {
           const requestId = item.correlationId;
           const commandId = item.causationId;
 
-          await client?.appendToStream(
-            `transactions-${senderId}`,
-            [
-              jsonEvent({
-                type: "DEBIT",
-                data: {
-                  transactionId: txId,
-                  userId: senderId,
-                  senderAccountId,
-                  amount: amount.toString(),
-                },
-                metadata: {
-                  requestId,
-                  correlationId: requestId,
-                  causationId: commandId,
-                  direction: "DEBIT",
-                  source: "http-api",
-                },
-              }),
-            ]
-          );
-
-          await client?.appendToStream(
-            `transactions-${receiverId}`,
-            [
-              jsonEvent({
-                type: "CREDIT",
-                data: {
-                  transactionId: txId,
-                  userId: receiverId,
-                  receiverAccountId,
-                  amount: amount.toString(),
-                },
-                metadata: {
-                  requestId,                  // SAME as debit
-                  correlationId: requestId,    // SAME as debit
-                  causationId: commandId,      // SAME command
-                  direction: "CREDIT",
-                  source: "http-api",
-                },
-              }),
-            ]
-          );
-
-
           await prisma.outbox.update({
             where: { id: item.id },
             data: { status: "SUCCESS" },

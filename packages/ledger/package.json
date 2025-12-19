@@ -21,11 +21,11 @@
       "types": "./dist/index.d.ts"
     }
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "@kurrent/kurrentdb-client": "~1.0.4",
-    "dotenv": "^17.2.3"
-  }
+  "@prisma/client": "6.19.0",
+  "dotenv": "^17.2.3"
+},
+"author": "",
+"license": "ISC",
+"keywords": []
 }

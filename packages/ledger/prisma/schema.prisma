@@ -1,0 +1,80 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum LedgerEventType {
+  AUTHORIZATION
+  SETTLEMENT
+  REVERSAL
+}
+enum paymentType {
+  Online
+  Cheque
+  Cash
+  None
+}
+
+
+model User {
+  id        String   @id @default(uuid())
+  username  String
+  email     String   @unique
+  accounts  Account[]
+  createdAt DateTime @default(now())
+}
+
+model Account {
+  id            String   @id @default(uuid())
+  userId        String
+  balance       Decimal  @default(0)
+  ledgerEntries LedgerEntry[]
+  transactions  Transaction[] @relation("AccountTransactions")
+  user          User     @relation(fields: [userId], references: [id])
+  createdAt     DateTime @default(now())
+}
+
+model Transaction {
+  id                        String   @id @default(uuid())
+  senderPrimaryAccountId     String
+  receiverPrimaryAccountId   String
+  senderId                   String
+  receiverId                 String
+  amount                     Decimal
+  createdAt                  DateTime  @default(now())
+  ledgerEntries              LedgerEntry[]
+  sender                     Account @relation("AccountTransactions", fields: [senderPrimaryAccountId], references: [id])
+}
+
+model LedgerEntry {
+  id                        String   @id @default(uuid())
+  transactionId             String
+  debit                     Decimal   @default(0)
+  credit                    Decimal   @default(0)
+  debitType                 paymentType @default(None)
+  creditType                paymentType @default(None)
+  balanceAfter              Decimal
+  note                      String
+  createdAt                 DateTime  @default(now())
+  events                    LedgerEvent[]
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+}
+
+model LedgerEvent {
+  id             String   @id @default(uuid())
+  ledgerEntryId  String
+  type           LedgerEventType
+  createdAt      DateTime @default(now())
+}
+
+model Idempotency {
+  idempotencyKey String  @id
+  transactionId  String
+  status         String
+  responseData   Json?
+  createdAt      DateTime @default(now())
+}

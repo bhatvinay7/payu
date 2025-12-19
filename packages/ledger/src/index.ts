@@ -1,47 +1,11 @@
-import { KurrentDBClient, NO_STREAM,START,FORWARDS,jsonEvent,persistentSubscriptionToAllSettingsFromDefaults,ANY,
-streamNameFilter} from "@kurrent/kurrentdb-client";
+import { PrismaClient,Prisma ,User,Account,Transaction,paymentStatus,paymentType} from '@prisma/client';
+const globalForPrisma = global as unknown as {
+  prisma:  PrismaClient | undefined;
+};
 
-let client: KurrentDBClient | null = null;
+export const prisma = globalForPrisma.prisma ??
+  new PrismaClient();
 
-const RETRY_MIN = 1000
-const RETRY_MAX = 30000
-
-function getBackoffDelay(attempt: number) {
-  return Math.min(RETRY_MIN * 2 ** attempt, RETRY_MAX);
-}
-
-export async function getKurrentDB(): Promise<KurrentDBClient |undefined> {
-  if (client) return client;
-
-  let attempt = 0;
-
-  while (true) {
-    try {
-      client =  KurrentDBClient.connectionString`kurrentdb://kurrent:kurrent-password@kurrent1:2113?tls=false&keepAliveInterval=10000&keepAliveTimeout=10000`;
-      console.log(" KurrentDB connected");
-      return client;
-    } catch (err:any) {
-      if(attempt<=3){
-
-        const wait = getBackoffDelay(attempt);
-        console.error(
-          `KurrentDB connection failed (attempt ${attempt}) → retrying in ${wait}ms`
-        );
-        
-        await new Promise((res) => setTimeout(res, wait));
-        attempt++;
-      }
-      else{
-        break;
-      }   
-    }
-  }
-}
-
-
-(async () => {
-  await getKurrentDB();
-})();
-
-export {client,START,FORWARDS,NO_STREAM,ANY,persistentSubscriptionToAllSettingsFromDefaults,
-streamNameFilter,jsonEvent};
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+export type {User,Account,Transaction}
+export { Prisma,paymentStatus,paymentType }
