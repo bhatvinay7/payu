@@ -23,7 +23,7 @@ interface Props {
 }
 
 export default function UserTransactions() {
-    const [ transactions,setTransaction]=useState<Transaction[]>([{
+  const [transactions, setTransaction] = useState<Transaction[]>([{
     id: "TXN_9F2A3K81",
     type: "CREDIT",
     amount: 2500,
@@ -59,7 +59,7 @@ export default function UserTransactions() {
     createdAt: "2025-03-11T20:55:00Z",
   },])
   return (
-    <div className="w-full space-y-4 p-8 text-black border border-black/15 rounded-2xl">
+    <div className="w-full space-y-4 p-4 text-black border border-black/15 rounded-2xl">
       <h3 className="text-lg font-semibold">Recent Transactions</h3>
 
       <Separator />
@@ -77,11 +77,10 @@ export default function UserTransactions() {
                 {/* Left */}
                 <div className="flex items-center gap-3">
                   <div
-                    className={`h-10 w-10 rounded-full flex items-center justify-center ${
-                      isDebit
+                    className={`h-10 w-10 rounded-full flex items-center justify-center ${isDebit
                         ? "bg-red-100 text-red-600"
                         : "bg-green-100 text-green-600"
-                    }`}
+                      }`}
                   >
                     {isDebit ? (
                       <ArrowUpRight className="h-5 w-5" />
@@ -106,21 +105,19 @@ export default function UserTransactions() {
                 {/* Right */}
                 <div className="flex flex-col items-end gap-1">
                   <p
-                    className={`font-semibold ${
-                      isDebit ? "text-red-600" : "text-green-600"
-                    }`}
+                    className={`font-semibold ${isDebit ? "text-red-600" : "text-green-600"
+                      }`}
                   >
                     {isDebit ? "-" : "+"}₹{tx.amount}
                   </p>
 
                   <Badge
-                    className={`text-xs px-2 py-0.5 ${
-                      tx.status === "SUCCESS"
+                    className={`text-xs px-2 py-0.5 ${tx.status === "SUCCESS"
                         ? "bg-green-600 text-white"
                         : tx.status === "PENDING"
-                        ? "bg-yellow-500 text-white"
-                        : "bg-red-600 text-white"
-                    }`}
+                          ? "bg-yellow-500 text-white"
+                          : "bg-red-600 text-white"
+                      }`}
                   >
                     {tx.status}
                   </Badge>

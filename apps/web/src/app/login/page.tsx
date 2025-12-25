@@ -32,27 +32,37 @@ export default function Login() {
   };
 
   return (
-    <div className="h-screen bg-white flex items-center justify-center bg-muted px-4">
-      <Card className="w-full max-w-md text-black border border-black/15 shadow-lg rounded-2xl">
-        <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-semibold">Login to Payit</CardTitle>
+    <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 dark:bg-background p-4 transition-colors duration-300">
+      <Card className="w-full max-w-sm shadow-xl border-slate-200 dark:border-border bg-white dark:bg-card">
+        <CardHeader className="space-y-2 text-center pb-6">
+          <div className="mx-auto w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-pink-500 flex items-center justify-center shadow-md mb-2">
+            <span className="text-white font-bold text-lg">PI</span>
+          </div>
+          <CardTitle className="text-2xl font-bold text-indigo-950 dark:text-indigo-100">Welcome back</CardTitle>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Sign in to your PayIt account</p>
         </CardHeader>
 
         <CardContent className="space-y-4">
-
           <Button
-            className="w-full flex items-center border border-black/15 justify-center gap-2"
+            className="w-full flex items-center justify-center gap-3 bg-white dark:bg-background border border-slate-200 dark:border-border hover:bg-slate-50 dark:hover:bg-accent text-slate-700 dark:text-slate-200 h-11 transition-all shadow-sm"
             onClick={handleGoogleLogin}
             disabled={loading}
           >
             <FcGoogle className="h-5 w-5" />
-            {loading ? "Redirecting..." : "Continue with Google"}
+            <span className="font-medium">{loading ? "Redirecting..." : "Continue with Google"}</span>
           </Button>
 
-          <Separator />
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-slate-200 dark:border-border" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white dark:bg-card px-2 text-slate-400">or</span>
+            </div>
+          </div>
 
-          <p className="text-center text-sm text-muted-foreground">
-            By continuing, you agree to Payit’s Terms of Service and Privacy Policy.
+          <p className="text-center text-xs text-slate-400 px-4 leading-relaxed">
+            By continuing, you agree to our Terms of Service and Privacy Policy.
           </p>
         </CardContent>
       </Card>

@@ -11,29 +11,29 @@
     "check-types": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "^2.11.1",
-    "@tailwindcss/postcss": "^4.1.17",
+    "@reduxjs/toolkit": "^2.11.2",
+    "@tailwindcss/postcss": "^4.1.18",
     "@types/next": "^9.0.0",
     "axios": "^1.13.2",
     "framer-motion": "^12.23.26",
     "lucide-react": "^0.553.0",
-    "next": "^16.0.7",
+    "next": "^16.1.1",
     "payit-ui": "workspace:*",
     "postcss": "^8.5.6",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "react-icons": "^5.5.0",
     "react-redux": "^9.2.0",
-    "tailwindcss": "^4.1.17",
+    "tailwindcss": "^4.1.18",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^22.15.3",
+    "@types/node": "^22.19.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
-    "eslint": "^9.39.1",
+    "eslint": "^9.39.2",
     "types": "workspace:*",
     "typescript": "5.9.2"
   }
