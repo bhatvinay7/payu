@@ -1,0 +1,67 @@
+syntax = "proto3";
+package transaction;
+
+service TransactionService {
+  rpc CreateTransaction (CreateTransactionRequest)
+      returns (CreateTransactionResponse);
+}
+
+message CreateTransactionRequest {
+  TransactionData data = 1;
+  TransactionMetadata metadata = 2;
+}
+
+
+message TransactionData {
+  string transactionId = 1;
+
+  string senderId = 2;
+  string receiverId = 3;
+
+  string senderPrimaryAccountId = 4;
+  string receiverPrimaryAccountId = 5;
+
+  double debit = 6;
+  double credit = 7;
+
+  DebitType debitType = 8;
+  CreditType creditType = 9;
+
+  string note = 10;
+  TransactionStatus status = 11;
+  string createdAt = 12;
+}
+
+message TransactionMetadata {
+  string idempotencyKey = 1;
+  string causationId = 2;
+  string correlationId = 3;
+  string source = 4;
+  string actorId = 5;
+}
+
+
+message CreateTransactionResponse {
+  string transactionId = 1;
+  TransactionStatus status = 2;
+}
+
+
+enum DebitType {
+  DEBIT_TYPE_UNSPECIFIED = 0;
+  ONLINE = 1;
+  OFFLINE = 2;
+}
+
+enum CreditType {
+  CREDIT_TYPE_UNSPECIFIED = 0;
+  NONE = 1;
+  ONLINE = 2;
+}
+
+enum TransactionStatus {
+  TRANSACTION_STATUS_UNSPECIFIED = 0;
+  PENDING = 1;
+  SUCCESS = 2;
+  FAILED = 3;
+}

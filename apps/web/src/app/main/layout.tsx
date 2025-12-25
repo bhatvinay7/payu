@@ -6,14 +6,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-       <div className={`w-full h-screen flex flex-col `}>
-        <Navbar/>
-        <div className=' bg-white relative grid  grid-cols-1 sm:grid-cols-[auto_1fr] '>
-        <SidebarController/>
-        <div className='h-screen flex flex-col p-4'>
-        {children}
-        </div>
-        </div>
-        </div>
+    <div className={`w-full h-full flex flex-col bg-slate-50 dark:bg-background transition-colors duration-300`}>
+      <Navbar />
+      <div className='relative flex-1 flex overflow-hidden'>
+        <SidebarController />
+        <main className='flex-1 h-full overflow-y-auto p-4 md:p-6 scroll-smooth'>
+          {children}
+        </main>
+      </div>
+    </div>
   );
 }

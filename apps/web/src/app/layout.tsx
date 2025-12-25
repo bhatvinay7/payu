@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import ReduxProvider from  "../components/ReduxRootProvider"
+import ReduxProvider from "../components/ReduxRootProvider"
+import { ToastProvider } from "../components/toast-provider";
+import ThemeInitializer from "../components/theme-initializer";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -23,11 +25,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} `}>
-        < ReduxProvider>
-        {children}
-        </ReduxProvider>  
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${geistSans.variable} ${geistMono.variable} h-screen overflow-hidden bg-white dark:bg-background font-sans antialiased`}>
+        <ReduxProvider>
+          <ThemeInitializer>
+            <ToastProvider>
+              {children}
+            </ToastProvider>
+          </ThemeInitializer>
+        </ReduxProvider>
       </body>
     </html>
   );
